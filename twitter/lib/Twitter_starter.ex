@@ -26,7 +26,7 @@ defmodule Twitter.Starter do
 
     Enum.each(clientLst, fn x->
       IO.puts x
-    IO.inspect GenServer.cast(Process.whereis(String.to_atom(x)), {:register, "Inqalab zindabad!", x, numRequest, clientLst})
+    IO.inspect GenServer.cast(Process.whereis(String.to_atom(x)), {:register, "Inqalab zindabad! #Azadi #BoloAzadi #SonalseAzadi", x, numRequest, clientLst})
     end)
     end
 end

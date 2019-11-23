@@ -40,8 +40,9 @@ defmodule Twitter.Engine do
     end
 
     def handle_cast({:tweet, handleName, tweet}, state)do
+        lst = parseTweet(tweet, handleName)
         query = from(u in "subscribers", where: u.userID == ^handleName, select: u.follower)
-        lst = Twitter.Repo.all(query)
+        lst = lst ++ Twitter.Repo.all(query)
         Enum.each(lst, fn x -> 
             query2 = from u in "user_profile", where: u.userID == ^handleName, select: u.status
             [lst] = Twitter.Repo.all(query2)
@@ -57,5 +58,19 @@ defmodule Twitter.Engine do
         {:noreply, state}
     end
 
-    
+    def parseTweet(tweetStr, handleName) do
+        wordLst = String.split(tweetStr, " ")
+        mentionLst = []
+        IO.inspect wordLst
+        Enum.each(wordLst, fn x-> 
+            if String.at(x, 0) == "#" do
+                tag = %Twitter.HashTags{tags: x, tweet: tweetStr, handle: handleName}
+                Twitter.Repo.insert(tag)
+            end
+            if String.at(x, 0) == "@"do
+                mentionLst = mentionLst ++ [x]
+            end
+        end)
+        mentionLst
+    end
 end
