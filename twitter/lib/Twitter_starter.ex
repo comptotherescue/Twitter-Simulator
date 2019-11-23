@@ -16,8 +16,17 @@ defmodule Twitter.Starter do
     end
 
     def clientStarter(numNode, numRequest)do
+    clientLst = []
+    clientLst = Enum.map(1..numNode, fn x->
     {:ok, _pid} = Twitter.Client.start_link()
-    IO.inspect _pid
-    IO.inspect GenServer.cast(_pid, {:register, "Inqalab zindabad!"})
+    handleName = "@User" <> inspect(_pid)
+    Process.register(_pid, String.to_atom(handleName))
+    handleName
+    end)
+
+    Enum.each(clientLst, fn x->
+      IO.puts x
+    IO.inspect GenServer.cast(Process.whereis(String.to_atom(x)), {:register, "Inqalab zindabad!", x, numRequest, clientLst})
+    end)
     end
 end

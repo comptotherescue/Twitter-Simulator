@@ -46,14 +46,15 @@ defmodule Twitter.Engine do
             query2 = from u in "user_profile", where: u.userID == ^handleName, select: u.status
             [lst] = Twitter.Repo.all(query2)
             if lst == true do
-                record = "%Twitter.User{userID: #{x}, tweets: #{tweet}, read: 1}"
-                Twitter.Repo.all(record)
-                GenServer.cast(Process.whereis(String.to_atom(x)),{:tweetrec, handleName})
+                record = %Twitter.User{userID: x, tweets: tweet, read: 1}
+                Twitter.Repo.insert(record)
+                GenServer.cast(Process.whereis(String.to_atom(x)),{:tweetrec, tweet, handleName})
             else
-                record = "%Twitter.User{userID: #{x}, tweets: #{tweet}, read: 0}"
-                Twitter.Repo.all(record)
+                record = %Twitter.User{userID: x, tweets: tweet, read: 0}
+                Twitter.Repo.insert(record)
             end
         end)
+        {:noreply, state}
     end
 
     
