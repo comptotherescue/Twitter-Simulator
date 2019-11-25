@@ -3,7 +3,7 @@ defmodule Twitter.Starter do
     def start(numNode, numRequest) do
         engineStarter()
         clientStarter(numNode, numRequest)
-        :timer.sleep(5000)
+        :timer.sleep(8000)
 
       end
 
@@ -19,11 +19,26 @@ defmodule Twitter.Starter do
     Process.register(_pid, String.to_atom(handleName))
     handleName
     end)
+  
+    Enum.each(clientLst, fn x->
+      GenServer.cast(Process.whereis(String.to_atom(x)), {:register, x})
+          end)
 
-    # Enum.each(clientLst, fn x->
-    #GenServer.cast(Process.whereis(String.to_atom(List.first(clientLst))), {:register, "Inqalab zindabad! #Azadi2  #RuthviseAzadi @User#PID<0.151.0>", List.first(clientLst), numRequest, clientLst})
-    #GenServer.cast(Process.whereis(String.to_atom(List.first(clientLst))), {:register, "Inqalab zindabad! #Azadi2  #SonalseAzadi @User#PID<0.149.0> @User#PID<0.150.0>", List.first(clientLst), numRequest, clientLst})
-    GenServer.cast(Process.whereis(String.to_atom(List.first(clientLst))), {:changestatus, String.to_atom(List.first(clientLst)) })
-    # end)
+    Enum.each(clientLst, fn x->
+      GenServer.cast(Process.whereis(String.to_atom(x)), {:subscribe, x, getUniqueLst(List.delete(clientLst, List.first(clientLst)), 2, [])})
+      end)
+    IO.inspect clientLst
+    Enum.each(Enum.take(clientLst, 2), fn x->
+      GenServer.cast(Process.whereis(String.to_atom(x)), {:tweet, x, "Apun bola tu meri laila!"})
+          end)
+        end  
+
+    def getUniqueLst(clientLst, num, lst)do
+      if num != 0 do
+        sub = Enum.random(clientLst)
+        lst = lst ++ getUniqueLst(List.delete(clientLst, sub), num-1, lst) ++ [sub]
+      else
+        []
+      end
     end
 end

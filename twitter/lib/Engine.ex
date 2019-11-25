@@ -39,11 +39,11 @@ defmodule Twitter.Engine do
     end
 
     def handle_cast({:tweet, handleName, tweet}, state)do
+        IO.puts handleName
         lst = parseTweet(tweet, handleName)
         query = from(u in "subscribers", where: u.userID == ^handleName, select: u.follower)
         lst = lst ++ Twitter.Repo.all(query)
         tweetfun(lst, tweet, handleName)
-       
         {:noreply, state}
     end
 

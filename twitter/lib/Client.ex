@@ -10,7 +10,7 @@ defmodule Twitter.Client do
         {:ok, state}
     end
 
-    def handle_cast({:register, tweet, handleName, numRequest, clientLst}, state)do
+    def handle_cast({:register, handleName}, state)do
         GenServer.call(:E2 ,{:register, handleName, handleName, "UFL", 25, "abc@ufl.edu", "abc"})
         #GenServer.call(:E2, {:delete, handleName})
         #GenServer.cast(:E2, {:subscribe, "@User#PID<0.149.0>" , "@User#PID<0.148.0>"})
@@ -18,13 +18,34 @@ defmodule Twitter.Client do
         {:noreply, state}
     end
 
+    def handle_cast({:delete, handleLst}, state)do
+        Enum.each(handleLst, fn handleName -> 
+        GenServer.call(:E2, {:delete, handleName})
+        end)
+    end
+
+    def handle_cast({:tweet, tweet, handleName}, state)do
+        GenServer.cast(:E2, {:tweet, tweet, handleName})
+        {:noreply, state}
+    end
+
     def handle_cast({:tweetrec, tweet, handleName}, state)do
-        IO.puts tweet 
+         IO.puts tweet
+         IO.inspect self()
         state = state ++ [tweet]
-    
-        userID= "@User" <> inspect(self())
-        IO.inspect userID
-        GenServer.cast(:E2, {:retweet, userID, tweet})
+        {:noreply, state}
+    end
+
+    def handle_cast({:subscribe, handleName, subLst}, state)do
+        Enum.each(subLst, fn x ->
+            GenServer.cast(:E2, {:subscribe, x, handleName})
+        end)
+        {:noreply, state}
+    end
+
+    def handle_cast({:retweet, handleName}, state)do
+        tweet = List.first(state)
+        GenServer.cast(:E2, {:retweet, handleName, tweet})
         {:noreply, state}
     end
 
