@@ -56,6 +56,14 @@ defmodule Twitter.Engine do
         {:noreply, state}
     end
 
+    def handle_cast({:hashtags, hashtag, handleName}, state)do
+        query = from(u in "hashtags", where: u.tags == ^hashtag, select: {u.tweet, u.handle})
+        lst = Twitter.Repo.all(query)
+        GenServer.cast(Process.whereis(String.to_atom(handleName)),{:hashtagsrec, lst})
+        {:noreply, state}
+    end
+    
+
     def tweetfun(lst, tweet, handleName)do
         Enum.each(lst, fn x -> 
             query2 = from u in "user_profile", where: u.userID == ^x, select: u.status

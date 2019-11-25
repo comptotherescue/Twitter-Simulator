@@ -29,13 +29,14 @@ defmodule Twitter.Starter do
       end)
     IO.inspect clientLst
     Enum.each(Enum.take(clientLst, 2), fn x->
-      GenServer.cast(Process.whereis(String.to_atom(x)), {:tweet, x, "Apun bola tu meri laila! @User#PID<0.151.0>"})
+      GenServer.cast(Process.whereis(String.to_atom(x)), {:tweet, x, "#Maaz Apun bola tu meri laila! @User#PID<0.151.0>"})
           end)
           :timer.sleep(1000)
     Enum.each(Enum.take(clientLst, -2), fn x->
-      IO.puts x
+      IO.puts "retweet " <> x
       GenServer.cast(Process.whereis(String.to_atom(x)), {:retweet, x})
           end)
+      GenServer.cast(Process.whereis(String.to_atom("@User#PID<0.151.0>")), {:hashtags, "#Maaz", "@User#PID<0.151.0>"})
         end  
 
     def getUniqueLst(clientLst, num, lst)do
