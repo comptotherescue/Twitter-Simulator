@@ -1,8 +1,8 @@
 defmodule Twitter.Subscribers do
     use Ecto.Schema
     
-    @primary_key {:userID, :string, autogenerate: false}
     schema "subscribers" do
+        field :userID, :string
         field :follower, :string
       end
   end

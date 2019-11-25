@@ -3,7 +3,7 @@ defmodule Twitter.Repo.Migrations.CreateClients do
 
   def change do
     create table(:user) do
-        add :userID, :string, primary_key: true
+        add :userID, :string
         add :tweets, :string
         add :read, :integer
     end

@@ -3,7 +3,7 @@ defmodule Twitter.Repo.Migrations.Subscribers do
 
   def change do
     create table(:subscribers) do
-      add :userID, :string, primary_key: true
+      add :userID, :string
       add :follower, :string
   end
 

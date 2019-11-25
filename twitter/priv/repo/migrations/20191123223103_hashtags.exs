@@ -3,7 +3,7 @@ defmodule Twitter.Repo.Migrations.Hashtags do
 
   def change do
     create table(:hashtags) do
-      add :tags, :string, primary_key: true
+      add :tags, :string
       add :tweet, :string
       add :handle, :string
     end

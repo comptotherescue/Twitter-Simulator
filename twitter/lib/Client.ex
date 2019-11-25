@@ -29,7 +29,6 @@ defmodule Twitter.Client do
     end
 
     def handle_cast({:changestatus, handleName}, state)do
-        changeset = change(%Twitter.HandleUsers{userID: "@User#PID<0.147.0>"}, status: true)
-        changset.change()
+        
     end
 end
