@@ -1,18 +1,14 @@
 defmodule Twitter.Starter do
     use Supervisor
     def start(numNode, numRequest) do
-        IO.puts "HI1"
         engineStarter()
-        IO.puts "HI2"
         clientStarter(numNode, numRequest)
         :timer.sleep(5000)
-        IO.puts "HI3"
+
       end
 
     def engineStarter do
       {:ok, _pid} = Twitter.Engine.start_link()
-        IO.puts "Engine up"
-        
     end
 
     def clientStarter(numNode, numRequest)do
@@ -24,9 +20,10 @@ defmodule Twitter.Starter do
     handleName
     end)
 
-    Enum.each(clientLst, fn x->
-      IO.puts x
-    IO.inspect GenServer.cast(Process.whereis(String.to_atom(x)), {:register, "Inqalab zindabad! #Azadi #BoloAzadi #SonalseAzadi", x, numRequest, clientLst})
-    end)
+    # Enum.each(clientLst, fn x->
+    #GenServer.cast(Process.whereis(String.to_atom(List.first(clientLst))), {:register, "Inqalab zindabad! #Azadi2  #RuthviseAzadi @User#PID<0.151.0>", List.first(clientLst), numRequest, clientLst})
+    #GenServer.cast(Process.whereis(String.to_atom(List.first(clientLst))), {:register, "Inqalab zindabad! #Azadi2  #SonalseAzadi @User#PID<0.149.0> @User#PID<0.150.0>", List.first(clientLst), numRequest, clientLst})
+    GenServer.cast(Process.whereis(String.to_atom(List.first(clientLst))), {:changestatus, String.to_atom(List.first(clientLst)) })
+    # end)
     end
 end

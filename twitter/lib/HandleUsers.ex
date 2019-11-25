@@ -1,8 +1,8 @@
 defmodule Twitter.HandleUsers do
     use Ecto.Schema
     
+    @primary_key {:userID, :string, autogenerate: false}
     schema "user_profile" do
-        field :userID, :string
         field :first_name, :string
         field :last_name, :string
         field :age, :integer

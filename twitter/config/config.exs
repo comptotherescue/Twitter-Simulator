@@ -7,5 +7,8 @@ config :twitter, Twitter.Repo,
   hostname: "localhost"
   
 
+
+config :logger, level: :info  
+
 config :twitter, ecto_repos: [Twitter.Repo]
 

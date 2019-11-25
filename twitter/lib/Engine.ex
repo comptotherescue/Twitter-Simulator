@@ -25,7 +25,6 @@ defmodule Twitter.Engine do
 
     def handle_call({:delete, handleName}, _from, state) do
         {num, _} = from(x in "user_profile", where: x.userID == ^handleName) |> Twitter.Repo.delete_all
-        IO.inspect num
         if num !=0 do
             {:reply, "Deleted!", state}
         else
@@ -43,8 +42,21 @@ defmodule Twitter.Engine do
         lst = parseTweet(tweet, handleName)
         query = from(u in "subscribers", where: u.userID == ^handleName, select: u.follower)
         lst = lst ++ Twitter.Repo.all(query)
+        tweetfun(lst, tweet, handleName)
+       
+        {:noreply, state}
+    end
+
+    def handle_cast({:retweet, handleName, tweet}, state)do
+        query = from(u in "subscribers", where: u.userID == ^handleName, select: u.follower)
+        lst = Twitter.Repo.all(query)
+        tweetfun(lst, tweet, handleName)
+        {:noreply, state}
+    end
+
+    def tweetfun(lst, tweet, handleName)do
         Enum.each(lst, fn x -> 
-            query2 = from u in "user_profile", where: u.userID == ^handleName, select: u.status
+            query2 = from u in "user_profile", where: u.userID == ^x, select: u.status
             [lst] = Twitter.Repo.all(query2)
             if lst == true do
                 record = %Twitter.User{userID: x, tweets: tweet, read: 1}
@@ -55,21 +67,21 @@ defmodule Twitter.Engine do
                 Twitter.Repo.insert(record)
             end
         end)
-        {:noreply, state}
     end
 
     def parseTweet(tweetStr, handleName) do
         wordLst = String.split(tweetStr, " ")
-        mentionLst = []
-        IO.inspect wordLst
-        Enum.each(wordLst, fn x-> 
+        mentionLst = Enum.reduce(wordLst,[],fn(x, acc)-> 
             if String.at(x, 0) == "#" do
                 tag = %Twitter.HashTags{tags: x, tweet: tweetStr, handle: handleName}
                 Twitter.Repo.insert(tag)
             end
             if String.at(x, 0) == "@"do
-                mentionLst = mentionLst ++ [x]
+                 acc ++ [x]
+            else
+                acc
             end
+            
         end)
         mentionLst
     end

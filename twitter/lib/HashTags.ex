@@ -1,8 +1,7 @@
 defmodule Twitter.HashTags do
     use Ecto.Schema
-    
+    @primary_key {:tags, :string, autogenerate: false}
     schema "hashtags" do
-        field :tags, :string
         field :tweet, :string
         field :handle, :string
       end
