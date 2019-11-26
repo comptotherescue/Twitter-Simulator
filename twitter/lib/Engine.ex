@@ -40,6 +40,8 @@ defmodule Twitter.Engine do
 
     def handle_cast({:tweet, handleName, tweet}, state)do
         IO.puts handleName
+        rec = %Twitter.User{userID: handleName, tweets: tweet, read: 1}
+        Twitter.Repo.insert(rec)
         mentionLst = parseTweet(tweet, handleName)
         query = from(u in "subscribers", where: u.userID == ^handleName, select: u.follower)
         lst =  Twitter.Repo.all(query)
@@ -50,6 +52,8 @@ defmodule Twitter.Engine do
     end
 
     def handle_cast({:retweet, handleName, tweet}, state)do
+        rec = %Twitter.User{userID: handleName, tweets: tweet, read: 1}
+        Twitter.Repo.insert(rec)
         query = from(u in "subscribers", where: u.userID == ^handleName, select: u.follower)
         lst = Twitter.Repo.all(query)
         tweetfun(lst, tweet, handleName)
@@ -68,14 +72,16 @@ defmodule Twitter.Engine do
         Enum.each(lst, fn x -> 
             query2 = from u in "user_profile", where: u.userID == ^x, select: u.status
             [lst] = Twitter.Repo.all(query2)
-            if lst == true do
-                record = %Twitter.User{userID: x, tweets: tweet, read: 1}
-                Twitter.Repo.insert(record)
-                GenServer.cast(Process.whereis(String.to_atom(x)),{:tweetrec, tweet, handleName})
-            else
-                record = %Twitter.User{userID: x, tweets: tweet, read: 0}
-                Twitter.Repo.insert(record)
-            end
+            if lst != nil do
+                if lst == true do
+                    record = %Twitter.User{userID: x, tweets: tweet, read: 1}
+                    Twitter.Repo.insert(record)
+                    GenServer.cast(Process.whereis(String.to_atom(x)),{:tweetrec, tweet, handleName})
+                else
+                    record = %Twitter.User{userID: x, tweets: tweet, read: 0}
+                    Twitter.Repo.insert(record)
+                end
+        end
         end)
     end
 
@@ -86,7 +92,7 @@ defmodule Twitter.Engine do
                 tag = %Twitter.HashTags{tags: x, tweet: tweetStr, handle: handleName}
                 Twitter.Repo.insert(tag)
             end
-            if String.at(x, 0) == "@"do
+            if String.at(x, 0) == "@"do 
                  acc ++ [x]
             else
                 acc
