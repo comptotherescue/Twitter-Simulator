@@ -4,10 +4,6 @@ defmodule TwitterTest do
   use ExUnit.Case
   doctest Twitter
 
-  test "greets the world" do
-    assert Twitter.hello() == :world
-  end
-
   test "registration check 1" do
     Twitter.Starter.engineStarter()
     Twitter.Starter.startRegistration(10)
@@ -48,6 +44,34 @@ defmodule TwitterTest do
     lst = Twitter.Repo.all(query)
     assert length(lst) == 20
     GenServer.cast(Process.whereis(String.to_atom(List.first(lst))), {:delete, lst})
+    from(x in "subscribers") |> Twitter.Repo.delete_all
+    :timer.sleep(5000)
+  end
+
+  test "subcriber single user check 2" do
+    Twitter.Starter.engineStarter()
+    {:ok, _pid} = Twitter.Client.start_link()
+    Process.register(_pid, String.to_atom("@adicool"))
+    GenServer.cast(_pid, {:subscribe, "@adicool", ["@apuchand"]})
+    :timer.sleep(2000)
+    query = from(u in "subscribers", where: u.userID == "@adicool", select: u.follower) 
+    lst = Twitter.Repo.all(query)
+    :timer.sleep(1000)
+    assert lst == ["@apuchand"]
+    from(x in "subscribers") |> Twitter.Repo.delete_all
+    :timer.sleep(5000)
+  end
+
+  test "subcriber single user check 3" do
+    Twitter.Starter.engineStarter()
+    {:ok, _pid} = Twitter.Client.start_link()
+    Process.register(_pid, String.to_atom("@adicool"))
+    GenServer.cast(_pid, {:subscribe, "@adicool", ["@apuchand", "@sonal_the_golu","@anagha_toman_queen"]})
+    :timer.sleep(2000)
+    query = from(u in "subscribers", where: u.userID == "@adicool", select: u.follower) 
+    lst = Twitter.Repo.all(query)
+    :timer.sleep(1000)
+    assert length(lst) == 3
     from(x in "subscribers") |> Twitter.Repo.delete_all
     :timer.sleep(5000)
   end
