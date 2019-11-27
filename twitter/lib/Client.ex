@@ -33,13 +33,13 @@ defmodule Twitter.Client do
     end
 
     def handle_cast({:tweet, tweet, handleName}, state)do
-        GenServer.cast(:E2, {:tweet, tweet, handleName})
+        GenServer.cast(:E2, {:tweet, handleName, tweet})
         {:noreply, state}
     end
 
     def handle_cast({:tweetrec, tweet, handleName}, state)do
-         IO.puts tweet
-         IO.inspect self()
+         #IO.puts tweet
+         #IO.inspect self()
         state = state ++ [tweet]
         {:noreply, state}
     end

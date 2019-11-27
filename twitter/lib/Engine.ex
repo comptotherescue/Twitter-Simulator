@@ -39,15 +39,16 @@ defmodule Twitter.Engine do
     end
 
     def handle_cast({:tweet, handleName, tweet}, state)do
-        IO.puts handleName
         rec = %Twitter.User{userID: handleName, tweets: tweet, read: 1}
         Twitter.Repo.insert(rec)
         mentionLst = parseTweet(tweet, handleName)
         query = from(u in "subscribers", where: u.userID == ^handleName, select: u.follower)
         lst =  Twitter.Repo.all(query)
         tweetfun(lst, tweet, handleName)
-        tweet = "Mentioned by: " <> handleName <> " Tweet: " <> tweet
-        tweetfun(mentionLst, tweet, handleName) 
+        if mentionLst != []do
+            tweet = "Mentioned by: " <> handleName <> " Tweet: " <> tweet
+            tweetfun(mentionLst, tweet, handleName) 
+        end
         {:noreply, state}
     end
 
@@ -71,9 +72,9 @@ defmodule Twitter.Engine do
     def tweetfun(lst, tweet, handleName)do
         Enum.each(lst, fn x -> 
             query2 = from u in "user_profile", where: u.userID == ^x, select: u.status
-            [lst] = Twitter.Repo.all(query2)
-            if lst != nil do
-                if lst == true do
+            lst = Twitter.Repo.all(query2)
+            if lst != [] do
+                if List.first(lst) == true do
                     record = %Twitter.User{userID: x, tweets: tweet, read: 1}
                     Twitter.Repo.insert(record)
                     GenServer.cast(Process.whereis(String.to_atom(x)),{:tweetrec, tweet, handleName})
