@@ -53,7 +53,7 @@ defmodule Twitter.Client do
 
     def handle_cast({:retweet, handleName}, state)do
         tweet = List.first(state)
-        IO.puts tweet
+        #IO.puts tweet
         if tweet != nil do
             tweet = "Retweet: " <> tweet
             GenServer.cast(:E2, {:retweet, handleName, tweet})
