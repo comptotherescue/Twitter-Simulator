@@ -61,14 +61,14 @@ defmodule Twitter.Starter do
     Enum.each(clientLst, fn x->
       GenServer.cast(Process.whereis(String.to_atom(x)), {:changestatus, x, false})
           end)
-
+    :timer.sleep(2000)
     Enum.each(clientLst, fn x->
       GenServer.cast(Process.whereis(String.to_atom(x)), {:subscribe, x, getUniqueLst(List.delete(clientLst, List.first(clientLst)), 2, [])})
       end)
     IO.inspect clientLst
     Enum.each(clientLst, fn x->
       Enum.each(1..numRequest, fn y ->
-      GenServer.cast(Process.whereis(String.to_atom(x)), {:tweet, x, "Tweet Number #{y}"})
+      GenServer.cast(Process.whereis(String.to_atom(x)), {:tweet, "Tweet Number #{y}", x})
           end)
         end)
 

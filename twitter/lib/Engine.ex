@@ -39,6 +39,7 @@ defmodule Twitter.Engine do
     end
 
     def handle_cast({:tweet, handleName, tweet}, state)do
+        #IO.puts handleName
         rec = %Twitter.User{userID: handleName, tweets: tweet, read: 1}
         Twitter.Repo.insert(rec)
         mentionLst = parseTweet(tweet, handleName)
