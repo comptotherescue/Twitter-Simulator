@@ -3,7 +3,7 @@ defmodule Twitter.Starter do
     def start(numNode, numRequest) do
         engineStarter()
         clientStarter(numNode, numRequest)
-        :timer.sleep(8000)
+        :timer.sleep(3000)
 
       end
 
@@ -57,6 +57,10 @@ defmodule Twitter.Starter do
     Enum.each(clientLst, fn x->
       GenServer.cast(Process.whereis(String.to_atom(x)), {:register, x})
           end)
+    
+    Enum.each(clientLst, fn x->
+      GenServer.cast(Process.whereis(String.to_atom(x)), {:changestatus, x, false})
+          end)
 
     Enum.each(clientLst, fn x->
       GenServer.cast(Process.whereis(String.to_atom(x)), {:subscribe, x, getUniqueLst(List.delete(clientLst, List.first(clientLst)), 2, [])})
@@ -67,6 +71,7 @@ defmodule Twitter.Starter do
       GenServer.cast(Process.whereis(String.to_atom(x)), {:tweet, x, "Tweet Number #{y}"})
           end)
         end)
+
     #       :timer.sleep(1000)
     # Enum.each(Enum.take(clientLst, -2), fn x->
     #   IO.puts "retweet " <> x

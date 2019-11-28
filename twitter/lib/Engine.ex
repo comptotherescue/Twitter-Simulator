@@ -68,6 +68,11 @@ defmodule Twitter.Engine do
         {:noreply, state}
     end
     
+    def handle_cast({:updatestatus, handleName, flag}, state)do
+        from(u in "user_profile", where: u.userID == ^handleName, select: u.userID)
+        |> Twitter.Repo.update_all(set: [status: flag])
+        {:noreply, state}
+    end
 
     def tweetfun(lst, tweet, handleName)do
         Enum.each(lst, fn x -> 
