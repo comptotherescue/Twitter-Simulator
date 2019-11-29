@@ -11,13 +11,13 @@ defmodule Twitter.Client do
     end
 
     def handle_cast({:register, handleName}, state)do
-        GenServer.call(:E2 ,{:register, handleName, handleName, "UFL", 25, "abc@ufl.edu", "abc"})
+        GenServer.cast(:E2 ,{:register, handleName, handleName, "UFL", 25, "abc@ufl.edu", "abc"})
         {:noreply, state}
     end
 
     def handle_cast({:delete, handleLst}, state)do
         Enum.each(handleLst, fn handleName -> 
-        GenServer.call(:E2, {:delete, handleName})
+        GenServer.cast(:E2, {:delete, handleName})
         end)
         {:noreply, state}
     end
@@ -33,6 +33,9 @@ defmodule Twitter.Client do
     end
 
     def handle_cast({:tweet, tweet, handleName}, state)do
+        GenServer.cast(self(), {:changestatus, handleName, true})
+        :timer.sleep(100)
+        GenServer.cast(self(), {:getMessages, handleName})
         GenServer.cast(:E2, {:tweet, handleName, tweet})
         {:noreply, state}
     end

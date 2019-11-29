@@ -10,26 +10,20 @@ defmodule Twitter.Engine do
         {:ok, state}
     end
 
-    def handle_call({:register, handleName, first_name, last_name, age, email, pass}, _from, state) do
+    def handle_cast({:register, handleName, first_name, last_name, age, email, pass}, state) do
         query = from u in "user_profile", where: u.userID == ^handleName, select: u.status
         lst = Twitter.Repo.all(query)
         if lst == [] do
             user = %Twitter.HandleUsers{userID: handleName, first_name: first_name, last_name: last_name,
                      age: age, email: email, password: pass, status: true}
             Twitter.Repo.insert(user)
-            {:reply, "Inserted!", state}
-        else
-            {:reply, "Failed to insert!", state}
         end
+        {:noreply, state}
     end
 
-    def handle_call({:delete, handleName}, _from, state) do
+    def handle_cast({:delete, handleName}, state) do
         {num, _} = from(x in "user_profile", where: x.userID == ^handleName) |> Twitter.Repo.delete_all
-        if num !=0 do
-            {:reply, "Deleted!", state}
-        else
-            {:reply, "Record not present!", state}
-        end
+        {:noreply, state}
     end
 
     def handle_cast({:subscribe, handleName, tofollow}, state)do
