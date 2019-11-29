@@ -1,8 +1,7 @@
 defmodule Twitter.Starter do
-    use Supervisor
     require Logger
     def start(numNode, numRequest) do
-        IO.puts "Simulation started...."
+        Logger.info("Simulation started....")
         start = System.monotonic_time(unquote(:millisecond))
         coverge_progress = Task.async(fn -> converge_progress(numNode*numRequest) end)
         Process.register(coverge_progress.pid, :supervisor)
@@ -18,7 +17,7 @@ defmodule Twitter.Starter do
         if count > 0 do
           receive do
               {:Converged} -> 
-              IO.puts "#{count-1} To finish"
+                Logger.info("#{count-1} To finish")
               converge_progress(count-1)
           end
       end
@@ -28,11 +27,10 @@ defmodule Twitter.Starter do
     end
 
     def startRegistration(numNode)do
-      clientLst = []
-      clientLst = Enum.map(1..numNode, fn x->
-      {:ok, _pid} = Twitter.Client.start_link()
-      handleName = "@User" <> inspect(_pid)
-      Process.register(_pid, String.to_atom(handleName))
+      clientLst = Enum.map(1..numNode, fn _x->
+      {:ok, pid} = Twitter.Client.start_link()
+      handleName = "@User" <> inspect(pid)
+      Process.register(pid, String.to_atom(handleName))
       handleName
       end)
     
@@ -42,11 +40,10 @@ defmodule Twitter.Starter do
     end
 
     def subscriber(numNode)do
-      clientLst = []
-    clientLst = Enum.map(1..numNode, fn x->
-    {:ok, _pid} = Twitter.Client.start_link()
-    handleName = "@User" <> inspect(_pid)
-    Process.register(_pid, String.to_atom(handleName))
+    clientLst = Enum.map(1..numNode, fn _x->
+    {:ok, pid} = Twitter.Client.start_link()
+    handleName = "@User" <> inspect(pid)
+    Process.register(pid, String.to_atom(handleName))
     handleName
     end)
   
@@ -62,12 +59,10 @@ defmodule Twitter.Starter do
     end
 
     def clientStarter(numNode, numRequest)do
-    clientLst = []
-    dynamicLst = []
-    clientLst = Enum.map(1..numNode, fn x->
-    {:ok, _pid} = Twitter.Client.start_link()
-    handleName = "@User" <> inspect(_pid)
-    Process.register(_pid, String.to_atom(handleName))
+    clientLst = Enum.map(1..numNode, fn _x->
+    {:ok, pid} = Twitter.Client.start_link()
+    handleName = "@User" <> inspect(pid)
+    Process.register(pid, String.to_atom(handleName))
     handleName
     end)
     
@@ -84,8 +79,8 @@ defmodule Twitter.Starter do
       GenServer.cast(Process.whereis(String.to_atom(x)), {:subscribe, x, getUniqueLst(clientLst, 2, [])})
       end)
     Enum.each(clientLst, fn x->
-      Enum.each(1..numRequest, fn y ->
-      GenServer.cast(Process.whereis(String.to_atom(x)), {:tweet, "This is a sample tweet.", x})
+      Enum.each(1..numRequest, fn _y ->
+      GenServer.cast(Process.whereis(String.to_atom(x)), {:tweet, "This is a sample tweet. #DOS #Project #Tweet", x})
           end)
         end)
 

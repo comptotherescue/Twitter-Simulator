@@ -5,6 +5,9 @@ defmodule TwitterTest do
   doctest Twitter
 
     test "registration check 1" do
+      from(x in "subscribers") |> Twitter.Repo.delete_all
+      from(x in "user") |> Twitter.Repo.delete_all
+      from(x in "user_profile") |> Twitter.Repo.delete_all
       Twitter.Starter.engineStarter()
       Twitter.Starter.startRegistration(10)
       query = from u in "user_profile", select: u.userID
@@ -17,10 +20,13 @@ defmodule TwitterTest do
     end
 
     test "registration single user check 2" do
+      from(x in "subscribers") |> Twitter.Repo.delete_all
+      from(x in "user") |> Twitter.Repo.delete_all
+      from(x in "user_profile") |> Twitter.Repo.delete_all
       Twitter.Starter.engineStarter()
-      {:ok, _pid} = Twitter.Client.start_link()
-      Process.register(_pid, String.to_atom("@user1"))
-      GenServer.cast(_pid, {:register, "@user1"})
+      {:ok, pid} = Twitter.Client.start_link()
+      Process.register(pid, String.to_atom("@user1"))
+      GenServer.cast(pid, {:register, "@user1"})
       query = from u in "user_profile", where: u.userID == "@user1", select: u.userID
       :timer.sleep(1000)
       lst = Twitter.Repo.all(query)
@@ -31,6 +37,9 @@ defmodule TwitterTest do
     end
 
     test "registration single user check 3" do
+      from(x in "subscribers") |> Twitter.Repo.delete_all
+      from(x in "user") |> Twitter.Repo.delete_all
+      from(x in "user_profile") |> Twitter.Repo.delete_all
       Twitter.Starter.engineStarter()
       query = from u in "user_profile", where: u.userID == "@user1", select: u.userID
       :timer.sleep(1000)
@@ -42,6 +51,9 @@ defmodule TwitterTest do
     end
 
     test "subcriber single user check 1" do
+      from(x in "subscribers") |> Twitter.Repo.delete_all
+      from(x in "user") |> Twitter.Repo.delete_all
+      from(x in "user_profile") |> Twitter.Repo.delete_all
       Twitter.Starter.engineStarter()
       Twitter.Starter.subscriber(10)
       :timer.sleep(1000)
@@ -55,10 +67,13 @@ defmodule TwitterTest do
     end
 
     test "subcriber single user check 2" do
+      from(x in "subscribers") |> Twitter.Repo.delete_all
+      from(x in "user") |> Twitter.Repo.delete_all
+      from(x in "user_profile") |> Twitter.Repo.delete_all
       Twitter.Starter.engineStarter()
-      {:ok, _pid} = Twitter.Client.start_link()
-      Process.register(_pid, String.to_atom("@user1"))
-      GenServer.cast(_pid, {:subscribe, "@user1", ["@user5"]})
+      {:ok, pid} = Twitter.Client.start_link()
+      Process.register(pid, String.to_atom("@user1"))
+      GenServer.cast(pid, {:subscribe, "@user1", ["@user5"]})
       :timer.sleep(2000)
       query = from(u in "subscribers", where: u.userID == "@user1", select: u.follower) 
       lst = Twitter.Repo.all(query)
@@ -71,9 +86,9 @@ defmodule TwitterTest do
 
     test "subcriber single user check 3" do
       Twitter.Starter.engineStarter()
-      {:ok, _pid} = Twitter.Client.start_link()
-      Process.register(_pid, String.to_atom("@user1"))
-      GenServer.cast(_pid, {:subscribe, "@user1", ["@user5", "@user2","@user3"]})
+      {:ok, pid} = Twitter.Client.start_link()
+      Process.register(pid, String.to_atom("@user1"))
+      GenServer.cast(pid, {:subscribe, "@user1", ["@user5", "@user2","@user3"]})
       :timer.sleep(2000)
       query = from(u in "subscribers", where: u.userID == "@user1", select: u.follower) 
       lst = Twitter.Repo.all(query)
@@ -85,6 +100,9 @@ defmodule TwitterTest do
     end
     
     test "tweet single user multiple subscribers check 1" do
+      from(x in "subscribers") |> Twitter.Repo.delete_all
+      from(x in "user") |> Twitter.Repo.delete_all
+      from(x in "user_profile") |> Twitter.Repo.delete_all
       coverge_progress = Task.async(fn -> Twitter.Starter.converge_progress(1) end)
       Process.register(coverge_progress.pid, :supervisor)
       Twitter.Starter.engineStarter()
@@ -116,6 +134,9 @@ defmodule TwitterTest do
     end
 
     test "tweet single user multiple subscribers mentions check 2" do
+      from(x in "subscribers") |> Twitter.Repo.delete_all
+      from(x in "user") |> Twitter.Repo.delete_all
+      from(x in "user_profile") |> Twitter.Repo.delete_all
       coverge_progress = Task.async(fn -> Twitter.Starter.converge_progress(1) end)
       Process.register(coverge_progress.pid, :supervisor)
       Twitter.Starter.engineStarter()
@@ -147,6 +168,9 @@ defmodule TwitterTest do
     end
 
     test "tweet single user multiple subscribers check 3" do
+      from(x in "subscribers") |> Twitter.Repo.delete_all
+      from(x in "user") |> Twitter.Repo.delete_all
+      from(x in "user_profile") |> Twitter.Repo.delete_all
       coverge_progress = Task.async(fn -> Twitter.Starter.converge_progress(1) end)
       Process.register(coverge_progress.pid, :supervisor)
       Twitter.Starter.engineStarter()
@@ -178,6 +202,9 @@ defmodule TwitterTest do
     end
 
     test "tweet multiple user multiple subscribers check 1" do
+      from(x in "subscribers") |> Twitter.Repo.delete_all
+      from(x in "user") |> Twitter.Repo.delete_all
+      from(x in "user_profile") |> Twitter.Repo.delete_all
       coverge_progress = Task.async(fn -> Twitter.Starter.converge_progress(4) end)
       Process.register(coverge_progress.pid, :supervisor)
       Twitter.Starter.engineStarter()
@@ -215,6 +242,9 @@ defmodule TwitterTest do
   end
 
   test "tweet multiple user multiple subscribers check 2" do
+    from(x in "subscribers") |> Twitter.Repo.delete_all
+    from(x in "user") |> Twitter.Repo.delete_all
+    from(x in "user_profile") |> Twitter.Repo.delete_all
     coverge_progress = Task.async(fn -> Twitter.Starter.converge_progress(4) end)
     Process.register(coverge_progress.pid, :supervisor)
     Twitter.Starter.engineStarter()
@@ -252,6 +282,9 @@ defmodule TwitterTest do
   end
 
   test "tweet multiple user multiple subscribers check 3" do
+    from(x in "subscribers") |> Twitter.Repo.delete_all
+    from(x in "user") |> Twitter.Repo.delete_all
+    from(x in "user_profile") |> Twitter.Repo.delete_all
     coverge_progress = Task.async(fn -> Twitter.Starter.converge_progress(4) end)
     Process.register(coverge_progress.pid, :supervisor)
     Twitter.Starter.engineStarter()
@@ -289,6 +322,10 @@ defmodule TwitterTest do
   end
 
   test "tweet single user multiple subscribers hashtags check 1" do
+    from(x in "subscribers") |> Twitter.Repo.delete_all
+    from(x in "user") |> Twitter.Repo.delete_all
+    from(x in "user_profile") |> Twitter.Repo.delete_all
+    from(x in "hashtags") |> Twitter.Repo.delete_all
     coverge_progress = Task.async(fn -> Twitter.Starter.converge_progress(1) end)
     Process.register(coverge_progress.pid, :supervisor)
     Twitter.Starter.engineStarter()
@@ -318,6 +355,10 @@ defmodule TwitterTest do
   end
 
   test "tweet single user multiple subscribers multiple hashtags check 2" do
+    from(x in "subscribers") |> Twitter.Repo.delete_all
+    from(x in "user") |> Twitter.Repo.delete_all
+    from(x in "user_profile") |> Twitter.Repo.delete_all
+    from(x in "hashtags") |> Twitter.Repo.delete_all
     coverge_progress = Task.async(fn -> Twitter.Starter.converge_progress(1) end)
     Process.register(coverge_progress.pid, :supervisor)
     Twitter.Starter.engineStarter()
@@ -347,6 +388,10 @@ defmodule TwitterTest do
   end
 
   test "tweet multiple user multiple subscribers multiple hashtags check 3" do
+    from(x in "subscribers") |> Twitter.Repo.delete_all
+    from(x in "user") |> Twitter.Repo.delete_all
+    from(x in "user_profile") |> Twitter.Repo.delete_all
+    from(x in "hashtags") |> Twitter.Repo.delete_all
     coverge_progress = Task.async(fn -> Twitter.Starter.converge_progress(2) end)
     Process.register(coverge_progress.pid, :supervisor)
     Twitter.Starter.engineStarter()
@@ -378,6 +423,10 @@ defmodule TwitterTest do
   end
 
   test "retweet single user multiple subscribers hashtags check 1" do
+    from(x in "subscribers") |> Twitter.Repo.delete_all
+    from(x in "user") |> Twitter.Repo.delete_all
+    from(x in "user_profile") |> Twitter.Repo.delete_all
+    from(x in "hashtags") |> Twitter.Repo.delete_all
     coverge_progress = Task.async(fn -> Twitter.Starter.converge_progress(1) end)
     Process.register(coverge_progress.pid, :supervisor)
     Twitter.Starter.engineStarter()
@@ -410,6 +459,10 @@ defmodule TwitterTest do
   end
 
   test "retweet single user multiple subscribers hashtags check 2" do
+    from(x in "subscribers") |> Twitter.Repo.delete_all
+    from(x in "user") |> Twitter.Repo.delete_all
+    from(x in "user_profile") |> Twitter.Repo.delete_all
+    from(x in "hashtags") |> Twitter.Repo.delete_all
     coverge_progress = Task.async(fn -> Twitter.Starter.converge_progress(1) end)
     Process.register(coverge_progress.pid, :supervisor)
     Twitter.Starter.engineStarter()
@@ -441,6 +494,10 @@ defmodule TwitterTest do
   end
 
   test "tweet single user multiple subscribers with some subscribers offline check 1" do
+    from(x in "subscribers") |> Twitter.Repo.delete_all
+    from(x in "user") |> Twitter.Repo.delete_all
+    from(x in "user_profile") |> Twitter.Repo.delete_all
+    from(x in "hashtags") |> Twitter.Repo.delete_all
     coverge_progress = Task.async(fn -> Twitter.Starter.converge_progress(1) end)
     Process.register(coverge_progress.pid, :supervisor)
     Twitter.Starter.engineStarter()
@@ -473,6 +530,10 @@ defmodule TwitterTest do
   end
 
   test "tweet single user multiple subscribers with some subscribers offline check 2" do
+    from(x in "subscribers") |> Twitter.Repo.delete_all
+    from(x in "user") |> Twitter.Repo.delete_all
+    from(x in "user_profile") |> Twitter.Repo.delete_all
+    from(x in "hashtags") |> Twitter.Repo.delete_all
     coverge_progress = Task.async(fn -> Twitter.Starter.converge_progress(1) end)
     Process.register(coverge_progress.pid, :supervisor)
     Twitter.Starter.engineStarter()
