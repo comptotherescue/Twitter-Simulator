@@ -1,12 +1,24 @@
 defmodule Twitter.Starter do
     use Supervisor
     def start(numNode, numRequest) do
+        IO.puts "Simulation started...."
+        coverge_progress = Task.async(fn -> converge_progress(numNode*numRequest) end)
+        Process.register(coverge_progress.pid, :supervisor)
         engineStarter()
         clientStarter(numNode, numRequest)
+        Task.await(coverge_progress, 1000000)
         :timer.sleep(3000)
-
       end
 
+    def converge_progress(count)do
+        if count > 0 do
+          receive do
+              {:Converged} -> 
+              IO.puts "#{count-1} To finish"
+              converge_progress(count-1)
+          end
+      end
+    end
     def engineStarter do
       {:ok, _pid} = Twitter.Engine.start_link()
     end
@@ -37,7 +49,7 @@ defmodule Twitter.Starter do
     Enum.each(clientLst, fn x->
       GenServer.cast(Process.whereis(String.to_atom(x)), {:register, x})
           end)
-
+          
     Enum.each(clientLst, fn x->
       GenServer.cast(Process.whereis(String.to_atom(x)), {:subscribe, x, getUniqueLst(List.delete(clientLst, List.first(clientLst)), 2, [])})
       end)
@@ -58,26 +70,20 @@ defmodule Twitter.Starter do
       GenServer.cast(Process.whereis(String.to_atom(x)), {:register, x})
           end)
     
-    Enum.each(clientLst, fn x->
-      GenServer.cast(Process.whereis(String.to_atom(x)), {:changestatus, x, false})
-          end)
+    sub = Enum.random(clientLst)
+    GenServer.cast(Process.whereis(String.to_atom(sub)), {:changestatus, sub, false})
     :timer.sleep(2000)
     Enum.each(clientLst, fn x->
       GenServer.cast(Process.whereis(String.to_atom(x)), {:subscribe, x, getUniqueLst(List.delete(clientLst, List.first(clientLst)), 2, [])})
       end)
-    IO.inspect clientLst
     Enum.each(clientLst, fn x->
       Enum.each(1..numRequest, fn y ->
-      GenServer.cast(Process.whereis(String.to_atom(x)), {:tweet, "Tweet Number #{y}", x})
+      GenServer.cast(Process.whereis(String.to_atom(x)), {:tweet, "Tweets", x})
           end)
         end)
-
-    #       :timer.sleep(1000)
-    # Enum.each(Enum.take(clientLst, -2), fn x->
-    #   IO.puts "retweet " <> x
-    #   GenServer.cast(Process.whereis(String.to_atom(x)), {:retweet, x})
-    #       end)
-    #   GenServer.cast(Process.whereis(String.to_atom("@User#PID<0.147.0>")), {:hashtags, "#Maaz", "@User#PID<0.147.0>"})
+    GenServer.cast(Process.whereis(String.to_atom(sub)), {:changestatus, sub, true})
+    :timer.sleep(1000)
+    GenServer.cast(Process.whereis(String.to_atom(sub)), {:getMessages, sub})
         end  
 
     def getUniqueLst(clientLst, num, lst)do

@@ -38,6 +38,26 @@ defmodule Twitter.Engine do
         {:noreply, state}
     end
 
+    def handle_cast({:getOfflineTweets, handleName}, state)do
+        query = from u in "user", where: u.userID == ^handleName and u.read == 0, select: u.tweets
+        lst = Twitter.Repo.all(query)
+        if lst != [] do
+            query2 = from u in "user_profile", where: u.userID == ^handleName, select: u.status
+            lst2 = Twitter.Repo.all(query2)
+            if lst2 != [] do
+                if List.first(lst2) == true do
+                    Enum.each(lst, fn x->
+                        GenServer.cast(Process.whereis(String.to_atom(handleName)),{:tweetrec, x, handleName})
+                    end)
+                    IO.puts "Online again, sending recorded tweets #{lst}"
+                    from(u in "user", where: u.userID == ^handleName, select: u.userID)
+                    |> Twitter.Repo.update_all(set: [read: 1])
+                    end
+                end
+            end
+        {:noreply, state}
+    end
+
     def handle_cast({:tweet, handleName, tweet}, state)do
         #IO.puts handleName
         rec = %Twitter.User{userID: handleName, tweets: tweet, read: 1}
@@ -50,6 +70,7 @@ defmodule Twitter.Engine do
             tweet = "Mentioned by: " <> handleName <> " Tweet: " <> tweet
             tweetfun(mentionLst, tweet, handleName) 
         end
+        send(Process.whereis(:supervisor),{:Converged})
         {:noreply, state}
     end
 

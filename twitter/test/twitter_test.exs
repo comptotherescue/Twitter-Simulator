@@ -408,4 +408,61 @@ defmodule TwitterTest do
     from(x in "hashtags") |> Twitter.Repo.delete_all
   end
 
+  test "tweet single user multiple subscribers with some subscribers offline check 1" do
+    Twitter.Starter.engineStarter()
+    {:ok, pid1} = Twitter.Client.start_link()
+    Process.register(pid1, String.to_atom("@adicool"))
+    {:ok, pid2} = Twitter.Client.start_link()
+    Process.register(pid2, String.to_atom("@sonal_the_golu"))
+    {:ok, pid3} = Twitter.Client.start_link()
+    Process.register(pid3, String.to_atom("@anagha_joshi"))
+    {:ok, pid4} = Twitter.Client.start_link()
+    Process.register(pid4, String.to_atom("@nishshri"))
+    :timer.sleep(1000)
+    GenServer.cast(pid1, {:register, "@adicool"})
+    GenServer.cast(pid2, {:register, "@sonal_the_golu"})
+    GenServer.cast(pid3, {:register, "@anagha_joshi"})
+    GenServer.cast(pid4, {:register, "@nishshri"})
+    GenServer.cast(pid1, {:subscribe, "@adicool", ["@sonal_the_golu","@anagha_joshi","@nishshri"]})
+    GenServer.cast(Process.whereis(String.to_atom("@sonal_the_golu")), {:changestatus, "@sonal_the_golu", false})
+    :timer.sleep(2000)
+    GenServer.cast(Process.whereis(String.to_atom("@adicool")), {:tweet, "Tweets", "@adicool"})
+    :timer.sleep(2000)
+    query = from(u in "user", where: u.read == 1, select: u.userID) 
+    lst = Twitter.Repo.all(query)
+    :timer.sleep(1000)
+    assert length(lst) == 3
+    from(x in "subscribers") |> Twitter.Repo.delete_all
+    from(x in "user") |> Twitter.Repo.delete_all
+    from(x in "user_profile") |> Twitter.Repo.delete_all
+  end
+
+  test "tweet single user multiple subscribers with some subscribers offline check 2" do
+    Twitter.Starter.engineStarter()
+    {:ok, pid1} = Twitter.Client.start_link()
+    Process.register(pid1, String.to_atom("@adicool"))
+    {:ok, pid2} = Twitter.Client.start_link()
+    Process.register(pid2, String.to_atom("@sonal_the_golu"))
+    {:ok, pid3} = Twitter.Client.start_link()
+    Process.register(pid3, String.to_atom("@anagha_joshi"))
+    {:ok, pid4} = Twitter.Client.start_link()
+    Process.register(pid4, String.to_atom("@nishshri"))
+    :timer.sleep(1000)
+    GenServer.cast(pid1, {:register, "@adicool"})
+    GenServer.cast(pid2, {:register, "@sonal_the_golu"})
+    GenServer.cast(pid3, {:register, "@anagha_joshi"})
+    GenServer.cast(pid4, {:register, "@nishshri"})
+    GenServer.cast(pid1, {:subscribe, "@adicool", ["@sonal_the_golu","@anagha_joshi","@nishshri"]})
+    GenServer.cast(Process.whereis(String.to_atom("@sonal_the_golu")), {:changestatus, "@sonal_the_golu", false})
+    :timer.sleep(2000)
+    GenServer.cast(Process.whereis(String.to_atom("@adicool")), {:tweet, "Tweets", "@adicool"})
+    :timer.sleep(2000)
+    query = from(u in "user", where: u.read == 1, select: u.userID) 
+    lst = Twitter.Repo.all(query)
+    :timer.sleep(1000)
+    assert length(lst) == 3
+    from(x in "subscribers") |> Twitter.Repo.delete_all
+    from(x in "user") |> Twitter.Repo.delete_all
+    from(x in "user_profile") |> Twitter.Repo.delete_all
+  end
 end
